@@ -65,3 +65,19 @@ Test name | Loss | Speed
 **ZeroMQ - multi-threaded** 	|	0,1%	| 107136
 **Naive Java - simple** 		|	84% 	| 776 
 **Naive Java - multi-threaded**	|	18%		| 2170
+
+#### Run #4 (release) ####
+
+Test name | Loss | Speed
+----------|------|----------------------------------
+**Netty - simple** 				|	0% 		| 60842 
+**Netty - multi-threaded**		|	0,9%	| 103720
+
+#### Run #5 (release) ####
+
+Test name | Loss | Speed
+----------|------|----------------------------------
+**ZeroMQ - simple** 			| 	0%		| 100745
+**ZeroMQ - multi-threaded** 	|	0,7%	| 123520
+**Netty - simple** 				|	0% 		| 66396 
+**Netty - multi-threaded**		|	0,1%	| 127671

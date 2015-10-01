@@ -19,11 +19,67 @@ public class Benchmark {
     final public static int MESSAGES_COUNT = 1000000;
     final public static int THREADS = 10;
 
-    public void run() throws Exception  {
+    public void run() throws Exception {
+        runNettySingle();
+        runNettyMultiThreaded();
         runZeromqSingle();
-//        runZeromqMultiThreaded();
-//        runPlainSingle();
-//        runPlainMultiThreaded();
+        runZeromqMultiThreaded();
+        runPlainSingle();
+        runPlainMultiThreaded();
+    }
+
+    public void runNettySingle() throws Exception {
+        NettyServer server = new NettyServer(SERVER_ADDRESS, SERVER_PORT);
+        Thread serverThread = new Thread(server);
+        serverThread.start();
+
+        Thread.sleep(1000);
+
+        NettyClient client = new NettyClient(SERVER_ADDRESS, SERVER_PORT);
+        Thread clientThread = new Thread(client);
+        clientThread.start();
+
+        while (client.isRunning()) {
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                // ignore
+            }
+        }
+        server.print();
+    }
+
+    public void runNettyMultiThreaded() throws Exception {
+        NettyServer server = new NettyServer(SERVER_ADDRESS, SERVER_PORT);
+        Thread serverThread = new Thread(server);
+        serverThread.start();
+
+        Thread.sleep(1000);
+
+        LinkedBlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+        ThreadPoolExecutor executor = new ThreadPoolExecutor(THREADS, THREADS, 100, TimeUnit.MILLISECONDS, queue);
+
+        List<Future<?>> futures = new ArrayList<>();
+        for (int count = 1; count <= THREADS; count++) {
+            NettyClient client = new NettyClient(SERVER_ADDRESS, SERVER_PORT);
+            futures.add(executor.submit(client));
+        }
+
+        while (true) {
+            Thread.sleep(100);
+            Iterator<Future<?>> iterator = futures.iterator();
+            while (iterator.hasNext()) {
+                Future<?> future = iterator.next();
+                if (future.isDone()) {
+                    iterator.remove();
+                }
+            }
+            if (futures.size() == 0) {
+                break;
+            }
+        }
+
+        server.print();
     }
 
     public void runZeromqSingle() throws Exception {
